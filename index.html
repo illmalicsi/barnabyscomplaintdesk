@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Barnaby's Complaint Desk — Window 7</title>
+  <meta name="description" content="A quirky, deadpan 3D bureaucratic web toy featuring Barnaby P. Quibble, Certified Bureaucrat at Window 7.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+  <!-- Full-screen WebGL Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Friendly In-Voice WebGL Fallback -->
+  <div id="webgl-fallback">
+    <div class="fallback-box">
+      <div class="fallback-seal">🏛️</div>
+      <div class="fallback-dept">Department of Minor Inconveniences • Window 7</div>
+      <h2 class="fallback-title">Window Temporarily Closed</h2>
+      <p class="fallback-text">
+        Window 7 cannot render bureaucratic graphics on this device. Please submit Form 109-NoGPU in triplicate, or access this terminal via a browser with WebGL hardware acceleration enabled.
+      </p>
+      <div class="fallback-subnote">
+        "Barnaby apologizes for any efficiency this lack of visual capability may inadvertently cause."
+      </div>
+    </div>
+  </div>
+
+  <!-- UI Overlay -->
+  <div class="ui-overlay">
+    
+    <!-- Top Header -->
+    <header class="top-header interactive">
+      <div class="dept-branding">
+        <div class="dept-sub">Department of Minor Inconveniences • Window 7</div>
+        <h1 class="dept-title">
+          <span class="clerk-avatar-badge" title="Barnaby P. Quibble, Certified Bureaucrat">👔</span>
+          Barnaby's Complaint Desk
+        </h1>
+      </div>
+
+      <div class="header-right">
+        <!-- Processed Counter -->
+        <div class="processed-counter" title="Total complaints stamped and filed into the void">
+          <span class="counter-label">Processed:</span>
+          <span id="counter-num" class="counter-num">0</span>
+        </div>
+
+        <!-- Audio Toggle Button -->
+        <button id="audio-toggle-btn" type="button" class="header-icon-btn" aria-pressed="true" title="Toggle Sound">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span>Sound</span>
+        </button>
+
+        <!-- Void Ledger / Filing Cabinet Button -->
+        <button id="history-toggle-btn" type="button" class="header-icon-btn" title="View Void Ledger (Past Complaints)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span>Ledger</span>
+        </button>
+
+        <!-- Theme Switcher -->
+        <div class="theme-switch-wrapper" role="radiogroup" aria-label="Visual Theme">
+          <button type="button" class="theme-pill-btn active" data-theme-choice="system" aria-pressed="true" title="Follow system dark/light preference">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>Auto</span>
+          </button>
+          <button type="button" class="theme-pill-btn" data-theme-choice="light" aria-pressed="false" title="Light theme">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <span>Light</span>
+          </button>
+          <button type="button" class="theme-pill-btn" data-theme-choice="dark" aria-pressed="false" title="Dark theme">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span>Dark</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Clerk Speech Bubble (Centered above clerk in 3D scene) -->
+    <div class="speech-bubble-container">
+      <div id="clerk-speech" class="speech-bubble" role="status" aria-live="polite">
+        Window 7 is open. I am Barnaby. Please state your grievance in 140 characters or fewer.
+      </div>
+    </div>
+
+    <!-- Bottom Container: Ticket Card, Desk Actions & Complaint Form -->
+    <footer class="bottom-container interactive">
+      
+      <!-- Ticket Card -->
+      <div id="ticket-card" class="ticket-card">
+        <div class="ticket-top">
+          <span id="ticket-number" class="ticket-number">#00000</span>
+          <span id="ticket-status" class="ticket-status-badge">Awaiting Filing</span>
+          <button id="download-slip-btn" type="button" class="ticket-action-btn" title="Download stamped Form 27-B/6 image" style="display: none;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Save Slip</span>
+          </button>
+        </div>
+        <div id="ticket-memo" class="ticket-memo">"Take a number. Form 27-B/6 required for all submissions."</div>
+        <div id="ticket-quote" class="ticket-clerk-quote">Barnaby: "State your grievance concisely."</div>
+      </div>
+
+      <!-- Desk Actions Toolbar -->
+      <div class="desk-actions-toolbar" aria-label="Desk interactions">
+        <button id="action-bell" type="button" class="desk-btn" title="Ring the brass service bell (or click 3D bell)">
+          <span class="desk-btn-icon">🔔</span>
+          <span>Ring Bell</span>
+        </button>
+        <button id="action-coffee" type="button" class="desk-btn" title="Bribe Barnaby with a coffee sip break (or click 3D mug)">
+          <span class="desk-btn-icon">☕</span>
+          <span>Coffee Sip</span>
+        </button>
+        <button id="action-random" type="button" class="desk-btn" title="Insert a quirky bureaucratic grievance">
+          <span class="desk-btn-icon">🎲</span>
+          <span>Surprise Me</span>
+        </button>
+        <button id="action-shred" type="button" class="desk-btn" title="Feed current form to the paper shredder">
+          <span class="desk-btn-icon">✂️</span>
+          <span>Shred</span>
+        </button>
+      </div>
+
+      <!-- Complaint Text Area & Submit -->
+      <form class="complaint-form-box" onsubmit="return false;">
+        <div class="input-wrapper">
+          <textarea
+            id="complaint-input"
+            class="complaint-textarea"
+            maxlength="140"
+            rows="2"
+            placeholder="Type your complaint here (max 140 characters)..."
+            aria-label="Complaint text"
+          ></textarea>
+        </div>
+
+        <div class="form-actions-row">
+          <div class="char-counter-group">
+            <span id="char-count" class="char-counter">0 / 140</span>
+            <span class="shortcut-hint">(Ctrl+Enter to submit)</span>
+          </div>
+
+          <button id="submit-btn" type="submit" class="btn-pill">
+            <span>File Complaint</span>
+          </button>
+        </div>
+      </form>
+
+    </footer>
+
+  </div>
+
+  <!-- Slide-out Void Ledger (Filing Cabinet) Drawer -->
+  <aside id="history-drawer" class="history-drawer" aria-label="The Void Ledger">
+    <div class="history-drawer-header">
+      <div class="history-drawer-title">
+        <span>🗄️</span>
+        <h3>The Void Ledger</h3>
+      </div>
+      <div class="history-drawer-actions">
+        <button id="history-clear-btn" type="button" class="drawer-mini-btn" title="Clear ledger history">Clear</button>
+        <button id="history-close-btn" type="button" class="drawer-close-btn" aria-label="Close ledger">✕</button>
+      </div>
+    </div>
+    <div class="history-drawer-subtitle">
+      Record of all grievances filed, judged, and condemned to bureaucracy at Window 7.
+    </div>
+    <div id="history-list" class="history-list">
+      <div class="history-empty">No filings recorded in this sector yet.<br>The void remains undisturbed.</div>
+    </div>
+  </aside>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
